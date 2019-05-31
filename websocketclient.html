@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WebSocket</title>
+    <meta charset="utf-8">
+    <style type="text/css">
+      html,body{
+        width:100%;
+        height:100%;
+        margin:0;
+        overflow:hidden;
+        font-family:"微软雅黑";
+      }
+      #log {
+        width: 440px;
+        height: 200px;
+        border: 1px solid #ccc;
+        overflow: hidden;
+      }
+      #msg {
+        width: 440px;
+      }
+    </style>
+  </head>
+  <body onload="init()">
+    <h3>WebSocket</h3><br /><br />
+    <div id="log"></div>
+    <input id="msg" type="text" onkeypress="onkey(event)" />
+    <button onclick="send()">发送</button>
+  </body>
+<script>
+var socket;
+function init() {
+  var host = "ws://127.0.0.1:8080/";
+  try {
+    socket = new WebSocket(host);
+    socket.onopen = function(msg) {
+      console.log("Socket session create success!");
+      log("Socket session create success!");
+    }
+    socket.onmessage = function(msg) {
+      console.log("Message success!");
+      log(msg.data);
+    }
+    socket.onclose = function(msg) {
+      console.log("Close success!");
+      log("Close success!");
+    }
+    socket.onerror = function(msg) {
+      console.log("Connect error!");
+    }
+  } catch (e) {
+    log(e);
+  }
+  $("msg").focus();
+}
+
+function send() {
+  var txt, msg;
+  txt = $("msg");
+  msg = txt.value;
+  console.log("message is: ", msg);
+  if (!msg) {
+    alert("Message can not be empty!");
+    return;
+  }
+  txt.value = "";
+  txt.focus();
+  try {
+    socket.send(msg);
+  } catch (e) {
+    log(e);
+  }
+}
+
+window.onbeforeunload = function() {
+  try {
+    socket.send('quit');
+    socket.close();
+    socket = null;
+  } catch (e) {
+    log(e);
+  }
+}
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function log(msg) {
+  $("log").innerHTML += "<br>" + msg;
+}
+
+function onkey(event) {
+  if (event.keyCode == 13) {
+    send();
+  }
+}
+</script>
+</html>
